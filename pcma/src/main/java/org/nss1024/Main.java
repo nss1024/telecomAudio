@@ -7,5 +7,8 @@ public class Main {
         System.out.println("Input: "+sample);
         short s =  pcmaDecoder.decodeSample(sample);
         System.out.println("Sample: "+s);
+
+        PcmuEncoder pcmuEncoder = new PcmuEncoder();
+
     }
 }
