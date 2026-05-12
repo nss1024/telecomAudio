@@ -16,13 +16,21 @@ public class PcmuEncoder {
     private static final int MAX_VALUE = 32635;
 
     public byte encode(short input){
+        byte result=0;
         int sign = getSign(input);
-        int sample = Math.abs(input);
+        int exponent = 0;
+        int mantissa = 0;
+        int sample = 0;
+        if(input<0){sample=-sample;}
+        else{sample = input;}
         sample=clip(sample);
         sample = sample+bias;
+        exponent=getExponent(sample);
+        mantissa = getMantissa(sample);
+        result=assembleByte(sign,exponent,mantissa);
+        result=invertByte(result);
 
-
-        return 0;
+        return result;
     }
 
     private int getSign(short input){
@@ -36,15 +44,13 @@ public class PcmuEncoder {
         return input;
     }
 
-    private int getExponent(int sample){
-        int msb=0;
-        int result = getSegment(sample);
-        result=msb-result;
-        return 0;
+    public int getExponent(int sample){
+
+        return getSegment(sample);
     }
 
-    public int getMantissa(){
-        return 0;
+    private int getMantissa(int sample){
+        return sample >> (getSegment(sample)+3)&0x0F;
     }
 
     private int getSegment(int sample){
@@ -56,12 +62,33 @@ public class PcmuEncoder {
             if((sample>=1024)&&(sample<=2047))return 5;
             if((sample>=2048)&&(sample<=4095))return 6;
             if((sample>=4096)&&(sample<=8191))return 7;
+            if(sample>8191)return 7;
         return 0;
     }
 
-    public int getMostSignificantBit(int sample){
+    private int getMostSignificantBit(int sample){
+        int msb = 0;
+        if(sample==0){return 0;}
+        if(sample==255){return 7;}
 
-        return 0;
+        if(sample>255){msb=7;sample=sample>>8;}
+        while(sample>0){
+            sample=sample>>1;
+            msb++;
+        }
+        return msb;
+    }
+
+    private byte assembleByte(int sign, int exponent, int mantissa){
+        int result = 0;
+        result = sign;
+        result=result|(exponent<<4);
+        result=result|mantissa;
+        return (byte)result;
+    }
+
+    private byte invertByte(byte b){
+        return (byte)~b;
     }
 
 }
