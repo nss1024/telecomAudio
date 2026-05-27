@@ -21,7 +21,7 @@ public class PcmuEncoder {
         int exponent = 0;
         int mantissa = 0;
         int sample = 0;
-        if(input<0){sample=-sample;}
+        if(input<0){sample=-input;}
         else{sample = input;}
         sample=clip(sample);
         sample = sample+bias;
@@ -50,7 +50,7 @@ public class PcmuEncoder {
     }
 
     private int getMantissa(int sample){
-        return sample >> (getSegment(sample)+3)&0x0F;
+        return (sample >> (getSegment(sample)+3))&0x0F;
     }
 
     private int getSegment(int sample){
