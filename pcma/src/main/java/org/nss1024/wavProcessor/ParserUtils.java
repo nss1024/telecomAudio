@@ -12,11 +12,7 @@ public class ParserUtils {
 
     public static String getRiff(ByteBuffer bb) throws UnsupportedFileException {
         byte[] r = new byte[4];
-        r[0]=bb.get();
-        r[1]=bb.get();
-        r[2]=bb.get();
-        r[3]=bb.get();
-
+       bb.get(r);
         String result = new String(r);
         if(result.equalsIgnoreCase("riff")){
             return result;
@@ -37,11 +33,7 @@ public class ParserUtils {
         }
         bb.position(8);
         byte[] r = new byte[4];
-        r[0]=bb.get();
-        r[1]=bb.get();
-        r[2]=bb.get();
-        r[3]=bb.get();
-
+        bb.get(r);
         String result = new String(r);
         if(result.equalsIgnoreCase("WAVE")){return result;}
         else{
@@ -50,9 +42,9 @@ public class ParserUtils {
     }
 
     public static int getChunkSize (ByteBuffer bb, int position){
-        if(bb.limit()<(position+4)){return -1;}
-        bb.position(position);
-        return bb.getInt();
+        if((position+4)>bb.limit()){return -1;}
+
+        return bb.getInt(position);
     }
 
 
@@ -61,10 +53,7 @@ public class ParserUtils {
         if(bb.limit()<(position+4)){throw new ByteBufferContentExceprion("Data in byte buffer less than position and retrievablt data!");}
         byte[] r = new byte[4];
         bb.position(position);
-        r[0]=bb.get();
-        r[1]=bb.get();
-        r[2]=bb.get();
-        r[3]=bb.get();
+        bb.get(r);
         return new String(r);
     }
 
