@@ -18,6 +18,7 @@ public class Main {
 
         String s = new String(bb.array());
 
+
         String riff = new String(s.substring(0,4).getBytes());
         System.out.println("Riff: "+riff);
         System.out.println("Size: "+ bb.position(4).getInt());
@@ -25,6 +26,8 @@ public class Main {
         System.out.println(ParserUtils.getFirstSubChunk(bb));
         System.out.println(ParserUtils.getChunkSize(bb,16));
         System.out.println(ParserUtils.getChunkId(bb,60));
+        System.out.println(ParserUtils.findFmt(bb));
+        System.out.println(ParserUtils.findSubChunk(bb,"data"));
 
 
     }

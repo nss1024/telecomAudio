@@ -4,7 +4,9 @@ import org.nss1024.customexceptions.ByteBufferContentExceprion;
 import org.nss1024.customexceptions.UnsupportedFileException;
 
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class ParserUtils {
 
@@ -66,5 +68,46 @@ public class ParserUtils {
     public static String  getFirstSubChunk(ByteBuffer bb) throws ByteBufferContentExceprion {
         return getChunkId(bb,12);
     }
+
+    public static int findFmt(ByteBuffer bb){
+        byte[] chunkId = new byte[4];
+        bb.position(12);
+        while(true){
+            bb.get(chunkId);
+            if(new String(chunkId, StandardCharsets.US_ASCII).equals("fmt ")){
+                return bb.position()-4;
+            }
+            if(bb.position()+4>=bb.limit()){return -1;}//can I read an int
+            int p = bb.getInt();
+            if(bb.position()+p>=bb.limit()){return -1;}//can I jump to next location
+            bb.position(bb.position()+p);
+        }
+    }
+
+    public static int findData(){
+        return 0;
+    }
+
+    public static int findSubChunk(ByteBuffer bb,String s){
+        byte[] chunkId = new byte[4];
+        bb.position(12);
+        while(true){
+            bb.get(chunkId);
+            if(new String(chunkId, StandardCharsets.US_ASCII).equals(s)){
+                return bb.position()-4;
+            }
+            if(bb.position()+4>=bb.limit()){return -1;}//can I read an int
+            int p = bb.getInt();
+            if(bb.position()+p>=bb.limit()){return -1;}//can I jump to next location
+            bb.position(bb.position()+p);
+        }
+    }
+
+    public static int getData(byte[] dst){
+        byte [] result = null;
+
+        return 0;
+    }
+
 
 }
