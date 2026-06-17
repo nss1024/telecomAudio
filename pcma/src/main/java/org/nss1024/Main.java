@@ -1,6 +1,7 @@
 package org.nss1024;
 
 import org.nss1024.customexceptions.ByteBufferContentExceprion;
+import org.nss1024.wavProcessor.ParserState;
 import org.nss1024.wavProcessor.ParserUtils;
 import org.nss1024.wavProcessor.WavLoader;
 
@@ -18,6 +19,7 @@ public class Main {
 
         String s = new String(bb.array());
 
+        ParserState parserState = ParserState.OK;
 
         String riff = new String(s.substring(0,4).getBytes());
         System.out.println("Riff: "+riff);
@@ -26,8 +28,9 @@ public class Main {
         System.out.println(ParserUtils.getFirstSubChunk(bb));
         System.out.println(ParserUtils.getChunkSize(bb,16));
         System.out.println(ParserUtils.getChunkId(bb,60));
-        System.out.println(ParserUtils.findFmt(bb));
-        System.out.println(ParserUtils.findSubChunk(bb,"data"));
+        System.out.println(ParserUtils.findFmtSubChunk(bb,parserState));
+        System.out.println(ParserUtils.findDataSubChunk(bb,parserState));
+        System.out.println(bb.getInt());
 
 
     }

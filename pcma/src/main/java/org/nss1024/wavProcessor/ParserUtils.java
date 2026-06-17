@@ -69,45 +69,87 @@ public class ParserUtils {
         return getChunkId(bb,12);
     }
 
-    public static int findFmt(ByteBuffer bb){
+    public static int findFmtSubChunk(ByteBuffer bb,ParserState p){
+        return findSubChunk(bb,"fmt ",p);
+    }
+
+    public static int findDataSubChunk(ByteBuffer bb, ParserState p){
+        return findSubChunk(bb,"data", p);
+    }
+
+    public static int findSubChunk(ByteBuffer bb,String s,ParserState ps){
         byte[] chunkId = new byte[4];
-        bb.position(12);
         while(true){
-            bb.get(chunkId);
-            if(new String(chunkId, StandardCharsets.US_ASCII).equals("fmt ")){
-                return bb.position()-4;
+            if(bb.position()+4>bb.limit()){
+                bb.compact();
+                ps=ParserState.WAIT_FOR_DATA;
+                return -1;
             }
-            if(bb.position()+4>=bb.limit()){return -1;}//can I read an int
-            int p = bb.getInt();
-            if(bb.position()+p>=bb.limit()){return -1;}//can I jump to next location
-            bb.position(bb.position()+p);
-        }
-    }
-
-    public static int findData(){
-        return 0;
-    }
-
-    public static int findSubChunk(ByteBuffer bb,String s){
-        byte[] chunkId = new byte[4];
-        bb.position(12);
-        while(true){
+            //get 4 byte chunk ID
             bb.get(chunkId);
+            ps=ParserState.READING_CHUNK_HEADER;
             if(new String(chunkId, StandardCharsets.US_ASCII).equals(s)){
                 return bb.position()-4;
             }
-            if(bb.position()+4>=bb.limit()){return -1;}//can I read an int
-            int p = bb.getInt();
-            if(bb.position()+p>=bb.limit()){return -1;}//can I jump to next location
-            bb.position(bb.position()+p);
+            ps=ParserState.SEARCHING_FOR_CHUNK;
+            //check if we can get the size of the retrieved subchunk, if not, return -1
+            if(bb.position()+4>=bb.limit()){
+                bb.compact();
+                ps=ParserState.WAIT_FOR_DATA;
+                return -1;
+            }
+            //get subchunk size
+            int pos = bb.getInt();
+            //if current position + size of data
+            //is greater than the available data, compact and return
+            if((bb.position()+pos)>=bb.limit()){
+            bb.compact();
+                ps=ParserState.WAIT_FOR_DATA;
+                return -1;
+            }
+            //jump to next location
+            bb.position(bb.position()+pos);
+            ps=ParserState.SKIPPING_PAYLOAD;
         }
     }
 
-    public static int getData(byte[] dst){
-        byte [] result = null;
-
-        return 0;
+    public static int findInitalSubChunk(ByteBuffer bb,String s,ParserState ps){
+        byte[] chunkId = new byte[4];
+        bb.position(12);
+        while(true){
+            if(bb.position()+4>bb.limit()){
+                bb.compact();
+                ps=ParserState.WAIT_FOR_DATA;
+                return -1;
+            }
+            //get 4 byte chunk ID
+            bb.get(chunkId);
+            ps=ParserState.READING_CHUNK_HEADER;
+            if(new String(chunkId, StandardCharsets.US_ASCII).equals(s)){
+                return bb.position()-4;
+            }
+            ps=ParserState.SEARCHING_FOR_CHUNK;
+            //check if we can get the size of the retrieved subchunk, if not, return -1
+            if(bb.position()+4>=bb.limit()){
+                bb.compact();
+                ps=ParserState.WAIT_FOR_DATA;
+                return -1;
+            }
+            //get subchunk size
+            int pos = bb.getInt();
+            //if current position + size of data
+            //is greater than the available data, compact and return
+            if((bb.position()+pos)>=bb.limit()){
+                bb.compact();
+                ps=ParserState.WAIT_FOR_DATA;
+                return -1;
+            }
+            //jump to next location
+            bb.position(bb.position()+pos);
+            ps=ParserState.SKIPPING_PAYLOAD;
+        }
     }
+
 
 
 }
