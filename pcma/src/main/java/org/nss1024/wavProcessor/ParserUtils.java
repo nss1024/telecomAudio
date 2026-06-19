@@ -69,70 +69,87 @@ public class ParserUtils {
         return getChunkId(bb,12);
     }
 
-    public static int findFmtSubChunk(ByteBuffer bb,ParserState p){
+    public static int findFmtSubChunk(ByteBuffer bb,ParserContext p){
         return findSubChunk(bb,"fmt ",p);
     }
 
-    public static int findDataSubChunk(ByteBuffer bb, ParserState p){
+    public static int findDataSubChunk(ByteBuffer bb, ParserContext p){
         return findSubChunk(bb,"data", p);
     }
 
-    public static int findSubChunk(ByteBuffer bb,String s,ParserState ps){
+    public static int findSubChunk(ByteBuffer bb,String s,ParserContext context){
         byte[] chunkId = new byte[4];
+        if(context.getBytesRemaining()>0 && !context.isHavePartialHeader()){
+            bb.position(context.getBytesRemaining());
+        }
+
         while(true){
+            //check if we can get a chunk id from the remaining data
             if(bb.position()+4>bb.limit()){
+                //calculate remaining data to read and process what we have
+                int remainingBytes=bb.limit()-bb.position();
+                context.setBytesRemaining(4-remainingBytes);
+                //store what bytes are available and move on
+                for(int j =0;j<remainingBytes;j++){
+                    context.addToPartialChunk(bb.get());
+                }
+                context.setHavePartialHeader(true);
                 bb.compact();
-                ps=ParserState.WAIT_FOR_DATA;
+                context.setParserState(ParserState.WAIT_FOR_DATA);
                 return -1;
             }
             //get 4 byte chunk ID
             bb.get(chunkId);
-            ps=ParserState.READING_CHUNK_HEADER;
+            context.setParserState(ParserState.READING_CHUNK_HEADER);
             if(new String(chunkId, StandardCharsets.US_ASCII).equals(s)){
                 return bb.position()-4;
             }
-            ps=ParserState.SEARCHING_FOR_CHUNK;
+
+            context.setParserState(ParserState.SEARCHING_FOR_CHUNK);
             //check if we can get the size of the retrieved subchunk, if not, return -1
             if(bb.position()+4>=bb.limit()){
                 bb.compact();
-                ps=ParserState.WAIT_FOR_DATA;
+                context.setParserState(ParserState.WAIT_FOR_DATA);
                 return -1;
             }
             //get subchunk size
-            int pos = bb.getInt();
+            int payloadSize = bb.getInt();
             //if current position + size of data
             //is greater than the available data, compact and return
-            if((bb.position()+pos)>=bb.limit()){
-            bb.compact();
-                ps=ParserState.WAIT_FOR_DATA;
+            if((bb.position()+payloadSize)>=bb.limit()){
+                //calculate number of remaining bytes after we move to end of bb
+                context.setBytesRemaining(payloadSize-(bb.limit()-bb.position()));
+                bb.position(bb.limit());
+                bb.compact();
+                context.setParserState(ParserState.WAIT_FOR_DATA);
                 return -1;
             }
             //jump to next location
-            bb.position(bb.position()+pos);
-            ps=ParserState.SKIPPING_PAYLOAD;
+            bb.position(bb.position()+payloadSize);
+            context.setParserState(ParserState.SKIPPING_PAYLOAD);
         }
     }
 
-    public static int findInitalSubChunk(ByteBuffer bb,String s,ParserState ps){
+    public static int findInitalSubChunk(ByteBuffer bb,String s,ParserContext context){
         byte[] chunkId = new byte[4];
         bb.position(12);
         while(true){
             if(bb.position()+4>bb.limit()){
                 bb.compact();
-                ps=ParserState.WAIT_FOR_DATA;
+                context.setParserState(ParserState.WAIT_FOR_DATA);
                 return -1;
             }
             //get 4 byte chunk ID
             bb.get(chunkId);
-            ps=ParserState.READING_CHUNK_HEADER;
+            context.setParserState(ParserState.READING_CHUNK_HEADER);
             if(new String(chunkId, StandardCharsets.US_ASCII).equals(s)){
                 return bb.position()-4;
             }
-            ps=ParserState.SEARCHING_FOR_CHUNK;
+            context.setParserState(ParserState.SEARCHING_FOR_CHUNK);
             //check if we can get the size of the retrieved subchunk, if not, return -1
             if(bb.position()+4>=bb.limit()){
                 bb.compact();
-                ps=ParserState.WAIT_FOR_DATA;
+                context.setParserState(ParserState.WAIT_FOR_DATA);
                 return -1;
             }
             //get subchunk size
@@ -141,12 +158,12 @@ public class ParserUtils {
             //is greater than the available data, compact and return
             if((bb.position()+pos)>=bb.limit()){
                 bb.compact();
-                ps=ParserState.WAIT_FOR_DATA;
+                context.setParserState(ParserState.WAIT_FOR_DATA);
                 return -1;
             }
             //jump to next location
             bb.position(bb.position()+pos);
-            ps=ParserState.SKIPPING_PAYLOAD;
+            context.setParserState(ParserState.SKIPPING_PAYLOAD);
         }
     }
 

@@ -1,6 +1,7 @@
 package org.nss1024;
 
 import org.nss1024.customexceptions.ByteBufferContentExceprion;
+import org.nss1024.wavProcessor.ParserContext;
 import org.nss1024.wavProcessor.ParserState;
 import org.nss1024.wavProcessor.ParserUtils;
 import org.nss1024.wavProcessor.WavLoader;
@@ -13,7 +14,8 @@ public class Main {
         //PcmuEncoder pcmuEncoder = new PcmuEncoder();
         //byte pcmuByte = pcmuEncoder.encode(sample);
         //System.out.println("Sample: "+sample+"\t"+"PCMU byte: "+pcmuByte+"\t"+"Encoded bits:"+Integer.toBinaryString(pcmuByte).substring(24));
-
+        ParserContext pc = new ParserContext();
+        pc.setBytesRemaining(12);
         WavLoader wavLoader = new WavLoader();
         ByteBuffer bb = wavLoader.loadHeader("C:\\dev\\FileStore\\audio\\test.wav");
 
@@ -28,8 +30,8 @@ public class Main {
         System.out.println(ParserUtils.getFirstSubChunk(bb));
         System.out.println(ParserUtils.getChunkSize(bb,16));
         System.out.println(ParserUtils.getChunkId(bb,60));
-        System.out.println(ParserUtils.findFmtSubChunk(bb,parserState));
-        System.out.println(ParserUtils.findDataSubChunk(bb,parserState));
+        System.out.println(ParserUtils.findFmtSubChunk(bb,pc));
+        System.out.println(ParserUtils.findDataSubChunk(bb,pc));
         System.out.println(bb.getInt());
 
 

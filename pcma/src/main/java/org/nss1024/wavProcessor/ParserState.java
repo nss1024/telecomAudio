@@ -7,6 +7,8 @@ public enum ParserState {
     SEARCHING_FOR_CHUNK,
     READING_CHUNK_HEADER,
     SKIPPING_PAYLOAD,
-    READING_DATA
+    READING_DATA;
 
+    public void getP() {
+    }
 }
