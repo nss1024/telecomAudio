@@ -7,6 +7,7 @@ import org.nss1024.wavProcessor.ParserUtils;
 import org.nss1024.wavProcessor.WavLoader;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) throws ByteBufferContentExceprion {
@@ -31,8 +32,19 @@ public class Main {
         System.out.println(ParserUtils.getChunkSize(bb,16));
         System.out.println(ParserUtils.getChunkId(bb,60));
         System.out.println(ParserUtils.findFmtSubChunk(bb,pc));
-        System.out.println(ParserUtils.findDataSubChunk(bb,pc));
-        System.out.println(bb.getInt());
+        int dataStart = ParserUtils.findDataSubChunk(bb,pc);
+        System.out.println(dataStart);
+        System.out.println(Arrays.toString(ParserUtils.readData(dataStart+4,bb,pc)));
+
+
+       int fmtLocation = ParserUtils.findFmtSubChunk(bb,pc);
+        System.out.println(fmtLocation);
+       int fmtSize = bb.position(fmtLocation+4).getInt();
+        System.out.println(fmtSize);
+       int fmtPayloadStart = fmtLocation+8;
+       pc.setFmt(ParserUtils.readPayload(bb,fmtPayloadStart,fmtSize,pc));
+
+        System.out.println(Arrays.toString(pc.getFmt()));
 
 
     }

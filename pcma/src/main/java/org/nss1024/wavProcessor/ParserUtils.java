@@ -130,43 +130,29 @@ public class ParserUtils {
         }
     }
 
-    public static int findInitalSubChunk(ByteBuffer bb,String s,ParserContext context){
-        byte[] chunkId = new byte[4];
-        bb.position(12);
-        while(true){
-            if(bb.position()+4>bb.limit()){
-                bb.compact();
-                context.setParserState(ParserState.WAIT_FOR_DATA);
-                return -1;
-            }
-            //get 4 byte chunk ID
-            bb.get(chunkId);
-            context.setParserState(ParserState.READING_CHUNK_HEADER);
-            if(new String(chunkId, StandardCharsets.US_ASCII).equals(s)){
-                return bb.position()-4;
-            }
-            context.setParserState(ParserState.SEARCHING_FOR_CHUNK);
-            //check if we can get the size of the retrieved subchunk, if not, return -1
-            if(bb.position()+4>=bb.limit()){
-                bb.compact();
-                context.setParserState(ParserState.WAIT_FOR_DATA);
-                return -1;
-            }
-            //get subchunk size
-            int pos = bb.getInt();
-            //if current position + size of data
-            //is greater than the available data, compact and return
-            if((bb.position()+pos)>=bb.limit()){
-                bb.compact();
-                context.setParserState(ParserState.WAIT_FOR_DATA);
-                return -1;
-            }
-            //jump to next location
-            bb.position(bb.position()+pos);
-            context.setParserState(ParserState.SKIPPING_PAYLOAD);
-        }
+    public static byte[] readData(int payloadStart, ByteBuffer bb, ParserContext context){
+        byte[] result = new byte[bb.limit()-payloadStart];
+        bb.get(result);
+        context.setParserState(ParserState.READING_DATA);
+        return result;
     }
 
+    public static byte[] readPayload(ByteBuffer bb, int startPosition,int size, ParserContext context){
+        //allocate array based on data that can be read
+        byte[] payload;
+        if((startPosition+size)>bb.limit()){
+            payload = new byte[bb.limit()-startPosition];
+            context.setBytesRemaining(bb.limit()-startPosition);
+            bb.position(startPosition);
+            bb.get(payload);
+            context.setPartialPayload(ByteBuffer.wrap(payload));
+        }else{
+            payload = new byte[size];
+            bb.position(startPosition);
+            bb.get(payload);
+        }
+        return payload;
+    }
 
 
 }

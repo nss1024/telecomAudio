@@ -6,7 +6,9 @@ public class ParserContext {
     private ParserState parserState;
     private int bytesRemaining;
     private final ByteBuffer partialChunk;
+    private ByteBuffer partialPayload;
     private boolean havePartialHeader = false;
+    private byte[] fmt;
 
 
     public ParserContext(){
@@ -46,5 +48,21 @@ public class ParserContext {
 
     public void setHavePartialHeader(boolean havePartialHeader) {
         this.havePartialHeader = havePartialHeader;
+    }
+
+    public byte[] getFmt() {
+        return fmt;
+    }
+
+    public void setFmt(byte[] fmt) {
+        this.fmt = fmt;
+    }
+
+    public ByteBuffer getPartialPayload() {
+        return partialPayload;
+    }
+
+    public void setPartialPayload(ByteBuffer partialPayload) {
+        this.partialPayload = partialPayload;
     }
 }

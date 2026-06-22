@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class WavLoader {
 
-    private WavData wavData;
+    private Wav wav;
 
     public WavLoader (){
 
@@ -34,8 +34,27 @@ public class WavLoader {
         return ByteBuffer.wrap(data.clone()).order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    public WavData getWavData() {
-        return wavData;
+    public void loadData(String fileName){
+        Path path = Paths.get(fileName);
+        File file = new File(path.toUri());
+        System.out.println(file.getAbsolutePath());
+        byte[] data = new byte[4096];
+
+        try(DataInputStream in = new DataInputStream(new FileInputStream(file));){
+            int dataIn=1;
+            while(dataIn>0) {
+                dataIn = in.read(data);
+
+            }
+        }catch (IOException e){
+            System.out.println(e.getMessage());
+            throw new RuntimeException();
+        }
+
+    }
+
+    public Wav getWavData() {
+        return wav;
     }
 
 }
