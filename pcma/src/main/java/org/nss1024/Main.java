@@ -1,10 +1,7 @@
 package org.nss1024;
 
 import org.nss1024.customexceptions.ByteBufferContentExceprion;
-import org.nss1024.wavProcessor.ParserContext;
-import org.nss1024.wavProcessor.ParserState;
-import org.nss1024.wavProcessor.ParserUtils;
-import org.nss1024.wavProcessor.WavLoader;
+import org.nss1024.wavProcessor.*;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -36,16 +33,22 @@ public class Main {
         System.out.println(dataStart);
         System.out.println(Arrays.toString(ParserUtils.readData(dataStart+4,bb,pc)));
 
+        Fmt fmt = new Fmt();
 
        int fmtLocation = ParserUtils.findFmtSubChunk(bb,pc);
         System.out.println(fmtLocation);
+        fmt.setFmtLocation(fmtLocation);
+        byte[] sId = new byte[4];
+        bb.position(fmtLocation).get(sId);
+        fmt.setSubchunkId(sId);
        int fmtSize = bb.position(fmtLocation+4).getInt();
         System.out.println(fmtSize);
+        fmt.setFmtSize(fmtSize);
+        fmt.setSubchunkSize(fmtSize);
        int fmtPayloadStart = fmtLocation+8;
-       pc.setFmt(ParserUtils.readPayload(bb,fmtPayloadStart,fmtSize,pc));
-
-        System.out.println(Arrays.toString(pc.getFmt()));
-
+        fmt.setFmtPayload(ParserUtils.readPayload(bb,fmtPayloadStart,fmtSize,pc));
+       fmt.setValues();
+        System.out.println(fmt.toString());
 
     }
 }

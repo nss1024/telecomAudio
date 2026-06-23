@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class WavLoader {
 
@@ -34,7 +35,7 @@ public class WavLoader {
         return ByteBuffer.wrap(data.clone()).order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    public void loadData(String fileName){
+    public void loadData(String fileName, ParserContext context){
         Path path = Paths.get(fileName);
         File file = new File(path.toUri());
         System.out.println(file.getAbsolutePath());
@@ -44,7 +45,13 @@ public class WavLoader {
             int dataIn=1;
             while(dataIn>0) {
                 dataIn = in.read(data);
+                if(!context.getParserState().equals(ParserState.READING_DATA)){
+                    //read required headers
 
+                }else if(context.getParserState().equals(ParserState.READING_DATA)){
+                    //read data
+                    System.out.println(Arrays.toString(data));
+                }
             }
         }catch (IOException e){
             System.out.println(e.getMessage());

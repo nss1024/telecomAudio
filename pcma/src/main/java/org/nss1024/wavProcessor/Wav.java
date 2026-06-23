@@ -6,7 +6,7 @@ public class Wav {
     private int chunkSize;//4-7 Size of the overall file - 8 bytes, in bytes (32-bit integer).
     private int format;//8-11 "WAVE" File Type Header. Always equals “WAVE”.
     //Format of sound information in data subchunk
-    FMT fmt;
+    Fmt fmt;
     //data subchunk
     WavData wavData;
 
