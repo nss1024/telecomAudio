@@ -4,10 +4,9 @@ import org.nss1024.customexceptions.WavFmtInvalidException;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class Fmt {
+public class Fmt implements WavHeader{
     private int fmtLocation;
     private int fmtSize;
     private byte[] fmtPayload;
@@ -23,25 +22,31 @@ public class Fmt {
 
     public Fmt(){}
 
-    public int getFmtLocation() {
-        return fmtLocation;
+    @Override
+    public String headerName(){
+        return "fmt ";
     }
 
-    public void setFmtLocation(int fmtLocation) {
-        this.fmtLocation = fmtLocation;
+    @Override
+    public void setSubchunkLocation(int location) {
+        this.fmtLocation = location;
     }
 
-    public int getFmtSize() {
-        return fmtSize;
+    @Override
+    public void setSubchunkId(ByteBuffer bb, int subChunkStartPosition) {
+        byte[] subchunkId = new byte[4];
+        bb.position(subChunkStartPosition);
+        bb.get(subchunkId);
+        this.subchunkId = new String(subchunkId, StandardCharsets.UTF_8);
     }
 
-    public void setFmtSize(int fmtSize) {
-        this.fmtSize = fmtSize;
+    @Override
+    public void setSubchunkSize(ByteBuffer bb, int subChunkStartPosition) {
+        bb.position(subChunkStartPosition+4);//skip the subchunk Id
+
+        this.subchunkSize = bb.getInt();
     }
 
-    public byte[] getFmtPayload() {
-        return fmtPayload;
-    }
 
     public void setFmtPayload(byte[] fmtPayload) {
         this.fmtPayload = fmtPayload;
@@ -51,22 +56,16 @@ public class Fmt {
         return subchunkId;
     }
 
-    public void setSubchunkId(byte[] subchunkId) {
-        this.subchunkId = new String(subchunkId, StandardCharsets.UTF_8);
-    }
+
 
     public int getSubchunkSize() {
         return subchunkSize;
     }
 
-    public void setSubchunkSize(int subchunkSize) {
-        this.subchunkSize = subchunkSize;
-    }
-
     public void setValues(){
         if(fmtPayload!=null){
             ByteBuffer bb = ByteBuffer.wrap(fmtPayload).order(ByteOrder.LITTLE_ENDIAN);
-            audioFormat = bb.getShort();
+            audioFormat = Short.toUnsignedInt(bb.getShort());
             numChannels = bb.getShort();
             sampleRate = bb.getInt();
             byteRate = bb.getInt();

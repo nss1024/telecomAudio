@@ -47,6 +47,14 @@ public class WavLoader {
                 dataIn = in.read(data);
                 if(!context.getParserState().equals(ParserState.READING_DATA)){
                     //read required headers
+                    for(WavHeader h : context.getRequiredHeaders()){
+                        ByteBuffer bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
+                        int location = ParserUtils.findSubChunk(bb,h.headerName(),context);
+                        h.setSubchunkLocation(location);
+                        h.setSubchunkId(bb,location);
+                        h.setSubchunkSize(bb,location);
+                        h.setSubchunkValues(bb);
+                    }
 
                 }else if(context.getParserState().equals(ParserState.READING_DATA)){
                     //read data

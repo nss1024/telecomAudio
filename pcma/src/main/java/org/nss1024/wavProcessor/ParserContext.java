@@ -1,6 +1,7 @@
 package org.nss1024.wavProcessor;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class ParserContext {
     private ParserState parserState;
@@ -9,6 +10,7 @@ public class ParserContext {
     private ByteBuffer partialPayload;
     private boolean havePartialHeader = false;
     private byte[] fmt;
+    ArrayList<WavHeader> requiredHeaders = new ArrayList<>();
 
 
     public ParserContext(){
@@ -64,5 +66,13 @@ public class ParserContext {
 
     public void setPartialPayload(ByteBuffer partialPayload) {
         this.partialPayload = partialPayload;
+    }
+
+    public ArrayList<WavHeader> getRequiredHeaders() {
+        return requiredHeaders;
+    }
+
+    public void addRequiredHeaders(WavHeader header) {
+        this.requiredHeaders.add(header);
     }
 }

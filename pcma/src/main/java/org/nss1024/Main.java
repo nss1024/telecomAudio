@@ -37,14 +37,11 @@ public class Main {
 
        int fmtLocation = ParserUtils.findFmtSubChunk(bb,pc);
         System.out.println(fmtLocation);
-        fmt.setFmtLocation(fmtLocation);
-        byte[] sId = new byte[4];
-        bb.position(fmtLocation).get(sId);
-        fmt.setSubchunkId(sId);
+        fmt.setSubchunkLocation(fmtLocation);
+        fmt.setSubchunkId(bb, fmtLocation);
        int fmtSize = bb.position(fmtLocation+4).getInt();
         System.out.println(fmtSize);
-        fmt.setFmtSize(fmtSize);
-        fmt.setSubchunkSize(fmtSize);
+        fmt.setSubchunkSize(bb,fmtLocation);
        int fmtPayloadStart = fmtLocation+8;
         fmt.setFmtPayload(ParserUtils.readPayload(bb,fmtPayloadStart,fmtSize,pc));
        fmt.setValues();

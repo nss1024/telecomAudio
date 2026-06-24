@@ -77,7 +77,7 @@ public class ParserUtils {
         return findSubChunk(bb,"data", p);
     }
 
-    public static int findSubChunk(ByteBuffer bb,String s,ParserContext context){
+    public static int findSubChunk(ByteBuffer bb,String chunkName,ParserContext context){
         byte[] chunkId = new byte[4];
         if(context.getBytesRemaining()>0 && !context.isHavePartialHeader()){
             bb.position(context.getBytesRemaining());
@@ -101,7 +101,7 @@ public class ParserUtils {
             //get 4 byte chunk ID
             bb.get(chunkId);
             context.setParserState(ParserState.READING_CHUNK_HEADER);
-            if(new String(chunkId, StandardCharsets.US_ASCII).equals(s)){
+            if(new String(chunkId, StandardCharsets.US_ASCII).equals(chunkName)){
                 return bb.position()-4;
             }
 
