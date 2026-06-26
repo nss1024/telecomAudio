@@ -12,6 +12,6 @@ public interface WavHeader {
 
     void setSubchunkSize(ByteBuffer bb, int subChunkStartPosition);
 
-    void setSubchunkValues(ByteBuffer bb);
+    void setSubchunkValues(ByteBuffer bb,int subchunkStart);
 
 }

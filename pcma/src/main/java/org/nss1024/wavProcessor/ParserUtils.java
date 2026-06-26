@@ -49,8 +49,6 @@ public class ParserUtils {
         return bb.getInt(position);
     }
 
-
-
     public static String getChunkId(ByteBuffer bb, int position)throws ByteBufferContentExceprion{
         if(bb.limit()<(position+4)){throw new ByteBufferContentExceprion("Data in byte buffer less than position and retrievablt data!");}
         byte[] r = new byte[4];

@@ -44,7 +44,7 @@ public class Main {
         fmt.setSubchunkSize(bb,fmtLocation);
        int fmtPayloadStart = fmtLocation+8;
         fmt.setFmtPayload(ParserUtils.readPayload(bb,fmtPayloadStart,fmtSize,pc));
-       fmt.setValues();
+       fmt.setSubchunkValues(bb,fmtLocation);
         System.out.println(fmt.toString());
 
     }

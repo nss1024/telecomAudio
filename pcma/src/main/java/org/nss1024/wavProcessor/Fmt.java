@@ -1,10 +1,12 @@
 package org.nss1024.wavProcessor;
 
+import org.nss1024.customexceptions.ByteBufferContentExceprion;
 import org.nss1024.customexceptions.WavFmtInvalidException;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 public class Fmt implements WavHeader{
     private int fmtLocation;
@@ -20,6 +22,8 @@ public class Fmt implements WavHeader{
     private int blockAlign; // 32-33 (BitsPerSample * Channels) / 8.1 - 8 bit mono2 - 8 bit stereo/16 bit mono4 - 16 bit stereo
     private int bitsPerSample; // 34-35 (BitsPerSample * Channels) / 8.1 - 8 bit mono2 - 8 bit stereo/16 bit mono4 - 16 bit stereo
 
+    private static final Logger logger = Logger.getLogger(Fmt.class.getName());
+
     public Fmt(){}
 
     @Override
@@ -34,17 +38,18 @@ public class Fmt implements WavHeader{
 
     @Override
     public void setSubchunkId(ByteBuffer bb, int subChunkStartPosition) {
-        byte[] subchunkId = new byte[4];
-        bb.position(subChunkStartPosition);
-        bb.get(subchunkId);
-        this.subchunkId = new String(subchunkId, StandardCharsets.UTF_8);
+        try {
+            this.subchunkId = ParserUtils.getChunkId(bb, subChunkStartPosition);
+        }catch (ByteBufferContentExceprion e){
+            logger.log(Level.WARNING,"Failed to get subchunk ID!");
+        }
     }
 
     @Override
     public void setSubchunkSize(ByteBuffer bb, int subChunkStartPosition) {
-        bb.position(subChunkStartPosition+4);//skip the subchunk Id
 
-        this.subchunkSize = bb.getInt();
+        this.subchunkSize = ParserUtils.getChunkSize(bb,subChunkStartPosition);
+
     }
 
 
@@ -56,15 +61,15 @@ public class Fmt implements WavHeader{
         return subchunkId;
     }
 
-
-
     public int getSubchunkSize() {
         return subchunkSize;
     }
 
-    public void setValues(){
+
+    @Override
+    public void setSubchunkValues(ByteBuffer bb, int subchunkStart){
         if(fmtPayload!=null){
-            ByteBuffer bb = ByteBuffer.wrap(fmtPayload).order(ByteOrder.LITTLE_ENDIAN);
+            bb.position(subchunkStart+8);
             audioFormat = Short.toUnsignedInt(bb.getShort());
             numChannels = bb.getShort();
             sampleRate = bb.getInt();
