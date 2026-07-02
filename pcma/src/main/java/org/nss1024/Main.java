@@ -20,7 +20,7 @@ public class Main {
         String s = new String(bb.array());
 
         ParserState parserState = ParserState.OK;
-
+/*
         String riff = new String(s.substring(0,4).getBytes());
         System.out.println("Riff: "+riff);
         System.out.println("Size: "+ bb.position(4).getInt());
@@ -32,20 +32,17 @@ public class Main {
         int dataStart = ParserUtils.findDataSubChunk(bb,pc);
         System.out.println(dataStart);
         System.out.println(Arrays.toString(ParserUtils.readData(dataStart+4,bb,pc)));
-
+*/
         Fmt fmt = new Fmt();
 
        int fmtLocation = ParserUtils.findFmtSubChunk(bb,pc);
         System.out.println(fmtLocation);
         fmt.setSubchunkLocation(fmtLocation);
         fmt.setSubchunkId(bb, fmtLocation);
-       int fmtSize = bb.position(fmtLocation+4).getInt();
-        System.out.println(fmtSize);
-        fmt.setSubchunkSize(bb,fmtLocation);
-       int fmtPayloadStart = fmtLocation+8;
-        fmt.setFmtPayload(ParserUtils.readPayload(bb,fmtPayloadStart,fmtSize,pc));
-       fmt.setSubchunkValues(bb,fmtLocation);
-        System.out.println(fmt.toString());
+        fmt.setSubchunkSize(bb,fmt.getFmtLocation());
+        fmt.setFmtPayload(bb,pc);
+        fmt.processSubChunk(bb,fmtLocation);
+        System.out.println(fmt);
 
     }
 }

@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 public class Fmt implements WavHeader{
     private int fmtLocation;
-    private int fmtSize;
     private byte[] fmtPayload;
 
     private String subchunkId;//12-15 "fmt" Format chunk marker. Includes trailing null
@@ -36,6 +35,10 @@ public class Fmt implements WavHeader{
         this.fmtLocation = location;
     }
 
+    public int getFmtLocation() {
+        return fmtLocation;
+    }
+
     @Override
     public void setSubchunkId(ByteBuffer bb, int subChunkStartPosition) {
         try {
@@ -47,14 +50,13 @@ public class Fmt implements WavHeader{
 
     @Override
     public void setSubchunkSize(ByteBuffer bb, int subChunkStartPosition) {
-
-        this.subchunkSize = ParserUtils.getChunkSize(bb,subChunkStartPosition);
+        int offset = 4;
+        this.subchunkSize = ParserUtils.getChunkSize(bb,subChunkStartPosition+offset);
 
     }
 
-
-    public void setFmtPayload(byte[] fmtPayload) {
-        this.fmtPayload = fmtPayload;
+    public void setFmtPayload(ByteBuffer bb, ParserContext c) {
+        this.fmtPayload = ParserUtils.readPayload(bb,fmtLocation+8,subchunkSize,c);
     }
 
     public String getSubchunkId() {
@@ -65,9 +67,12 @@ public class Fmt implements WavHeader{
         return subchunkSize;
     }
 
-
     @Override
-    public void setSubchunkValues(ByteBuffer bb, int subchunkStart){
+    public void processSubchunk(ByteBuffer bb, int subchunkStart) {
+        setSubchunkValues(bb,subchunkStart);
+    }
+
+    private void setSubchunkValues(ByteBuffer bb, int subchunkStart){
         if(fmtPayload!=null){
             bb.position(subchunkStart+8);
             audioFormat = Short.toUnsignedInt(bb.getShort());

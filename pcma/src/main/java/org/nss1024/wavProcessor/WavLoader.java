@@ -53,7 +53,7 @@ public class WavLoader {
                         h.setSubchunkLocation(location);
                         h.setSubchunkId(bb,location);
                         h.setSubchunkSize(bb,location);
-                        h.setSubchunkValues(bb,location);
+                        h.processSubchunk(bb,location);
                     }
 
                 }else if(context.getParserState().equals(ParserState.READING_DATA)){

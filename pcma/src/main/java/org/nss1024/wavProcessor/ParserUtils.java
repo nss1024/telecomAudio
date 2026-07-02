@@ -44,7 +44,7 @@ public class ParserUtils {
     }
 
     public static int getChunkSize (ByteBuffer bb, int position){
-        if((position+4)>bb.limit()){return -1;}
+        if((position+8)>bb.limit()){return -1;}
 
         return bb.getInt(position);
     }
